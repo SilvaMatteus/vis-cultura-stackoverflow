@@ -1,8 +1,13 @@
 ---
 title: "Comentários e cultura"
 output:
-    html_document:
+  html_document:
     df_print: paged
+    toc: yes
+    toc_float: yes
+  html_notebook:
+    toc: yes
+    toc_float: yes
 theme: sandstone
 ---
 
@@ -10,7 +15,7 @@ theme: sandstone
 library(tidyverse)
 library(here)
 library(viridis)
-source(here::here("code/lib.R"))
+source(here::here("code/import_data.R"))
 theme_set(theme_bw())
 
 knitr::opts_chunk$set(tidy = FALSE,
@@ -44,10 +49,82 @@ Considerando essa variável, queremos examinar a relação entre ela e o quão h
 
 Faça uma visualização que usa os princípios de eficácia no projeto de visualizações para facilitar as comparações que você acha que são as mais importantes para entendermos esse contexto. 
 
+```{r, message=FALSE, warning=FALSE}
+# http://jamesmarquezportfolio.com/correlation_matrices_in_r.html#.WP6WeFB-BPd.facebook
+# Para instalar:
+# install.packages("${url}", repos=NULL, type="source"
+
+library(psych)
+
+dados %>% select(comentaram_prop,
+       PDI, Internet, usuarios) %>% na.exclude() %>% pairs.panels(scale=F, ellipses = F, method = "kendall")
+```
+
+Foi escolhida uma visualização de uma matrix de correlações com uma visualzação da distribuição de cada uma das variáveis, de maneira a facilitar o entendimento sobre as relações entre as variáveis e a semelhança de suas distribuições.
+
 ## Outras formas de ver
 
 Em seguida, faça 5 visualizações que usem as mesmas variáveis e também pontos, mas que sejam **menos eficazes** que a que você escolheu acima. 
 
+### 1
+
+A primeira visualização apresenta informações semelhantes à visualização escolhida, mas utilizar o tamanho dos números que apresentam as correlações perdemos a legibilidade. Os asteriscos
+
+```{r, message=FALSE, warning=FALSE}
+# 1
+library("PerformanceAnalytics")
+
+dados %>% select(comentaram_prop,
+       PDI, Internet, usuarios) %>% na.exclude() %>% chart.Correlation(histogram=TRUE, pch=19)
+```
+
+### 2
+
+A próxima visualização não apresenta os valores de correlação. O leitor tem que estudar apenas os plots com os pontos para estudar a correlação.
+
+```{r, message=FALSE, warning=FALSE}
+# 2
+dados %>% select(comentaram_prop,
+       PDI, Internet, usuarios) %>% na.exclude() %>% pairs()
+```
+
+### 3
+
+A visualização abaixo é bem parecida com a visualição escolhida inicialmente. Contudo, ao utilizar o tamanho dos números que apresentam as correlações perdemos a legibilidade desses valores.
+
+```{r, message=FALSE, warning=FALSE}
+# 3
+dados %>% select(comentaram_prop,
+       PDI, Internet, usuarios) %>% na.exclude() %>% pairs.panels(scale=T, method = "kendall")
+```
+
+### 4
+
+A próxima visualização nos dá uma matrix que mostra apenas os valores das correlações.
+
+```{r, message=FALSE, warning=FALSE}
+# 4
+library(ggcorrplot)
+
+dados %>% select(comentaram_prop,
+       PDI, Internet, usuarios) %>% na.exclude() -> novos_dados
+
+ggcorrplot(cor(novos_dados), p.mat = cor_pmat(mtcars), hc.order=TRUE, type='lower', lab = TRUE,)
+```
+
+### 5
+
+Já a última visualização é a mais próxima a visualização escolhida. Contudo, não são mostrados os histogramas nem a linha de uma média condicional suavizada. Isso torna a visualização um pouco menos eficaz.
+
+```{r, message=FALSE, warning=FALSE}
+# 5
+
+library(GGally)
+
+dados %>% select(comentaram_prop,
+       PDI, Internet, usuarios) %>% na.exclude() %>% ggpairs()
+
+```
 ## Bônus
 
 Inclua o continente dos países (`six_regions`) na visualização.
